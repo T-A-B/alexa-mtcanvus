@@ -1,0 +1,372 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "m. t. canvus",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "HelloWorldIntent",
+          "slots": [],
+          "samples": [
+            "hello",
+            "how are you",
+            "say hi world",
+            "say hi",
+            "hi",
+            "say hello world",
+            "say hello"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "UnlinkAccountIntent",
+          "slots": [],
+          "samples": [
+            "unlink my account"
+          ]
+        },
+        {
+          "name": "LoadCanvasAll",
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{canvasNumber}"
+              ]
+            },
+            {
+              "name": "allClients",
+              "type": "allClients"
+            }
+          ],
+          "samples": [
+            "i want to load canvas number {canvasNumber} on {allClients}",
+            "load canvas {canvasNumber} on {allClients}"
+          ]
+        },
+        {
+          "name": "LoadCanvasOnClient",
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{canvasNumber}"
+              ]
+            },
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "load {canvasNumber} on {clientNumber}",
+            "i want to load canvas number {canvasNumber} on client number {clientNumber}",
+            "load canvas {canvasNumber} on client {clientNumber}"
+          ]
+        },
+        {
+          "name": "LoadCanvasOnClientWorkspace",
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{canvasNumber}"
+              ]
+            },
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{clientNumber}"
+              ]
+            },
+            {
+              "name": "workspaceNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{workspaceNumber}"
+              ]
+            }
+          ],
+          "samples": [
+            "i want to load canvas number {canvasNumber} on client number {clientNumber} workspace number {workspaceNumber}",
+            "load {canvasNumber} on {clientNumber} {workspaceNumber}",
+            "load canvas {canvasNumber} on client {clientNumber} workspace {workspaceNumber}"
+          ]
+        },
+        {
+          "name": "ShowCanvases",
+          "slots": [],
+          "samples": [
+            "list my canvases",
+            "which are my canvases",
+            "What are my canvases",
+            "Show my canvases",
+            "Show me my canvases"
+          ]
+        },
+        {
+          "name": "ShowClients",
+          "slots": [],
+          "samples": [
+            "what are my clients",
+            "list my clients",
+            "show my clients",
+            "show me my clients"
+          ]
+        },
+        {
+          "name": "ShowClientWorkspaces",
+          "slots": [
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{clientNumber}"
+              ]
+            }
+          ],
+          "samples": [
+            "show my workspaces",
+            "show my client {clientNumber} workspaces",
+            "What are client {clientNumber} workspaces"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "every client"
+              }
+            },
+            {
+              "name": {
+                "value": "all clients"
+              }
+            }
+          ],
+          "name": "allClients"
+        }
+      ],
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "LOW"
+        }
+      }
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "LoadCanvasAll",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.1010034783214"
+          },
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.561099937214.817890451372"
+              }
+            },
+            {
+              "name": "allClients",
+              "type": "allClients",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        },
+        {
+          "name": "LoadCanvasOnClient",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.406156848746"
+          },
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.853264555091.489099161816"
+              }
+            },
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        },
+        {
+          "name": "ShowClientWorkspaces",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.479601230879.568998342500"
+              }
+            }
+          ]
+        },
+        {
+          "name": "LoadCanvasOnClientWorkspace",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.1570363150497"
+          },
+          "slots": [
+            {
+              "name": "canvasNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1570363150497.1347381349142"
+              }
+            },
+            {
+              "name": "clientNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1570363150497.307247349360"
+              }
+            },
+            {
+              "name": "workspaceNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1570363150497.194579704056"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Confirm.Intent.1010034783214",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "are you sure you want to load canvas {canvasNumber} on all clients?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.406156848746",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "are you sure you want to load canvas {canvasNumber} on client {clientNumber} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.479601230879.568998342500",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the number of the client whose workspaces you want"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.853264555091.489099161816",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Tell me the index of the canvas to load"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1570363150497",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are you sure you want to load canvas {canvasNumber} on client {clientNumber} on workspace {workspaceNumber}"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1570363150497.1347381349142",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the index of the canvas you want to load?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1570363150497.307247349360",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the index of the client on which you want to load the canvas?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1570363150497.194579704056",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the index of the workspace on which you want to load the canvas?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.561099937214.817890451372",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the index of the canvas you want to load?"
+          }
+        ]
+      }
+    ]
+  },
+  "version": "9"
+}
