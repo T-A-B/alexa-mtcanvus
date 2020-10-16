@@ -14,10 +14,20 @@
           "description": "Sample Full Description",
           "smallIconUri": "file://assets/images/en-US_smallIconUri.png",
           "largeIconUri": "file://assets/images/en-US_largeIconUri.png"
+        },
+        "en-GB": {
+          "summary": "Sample Short Description",
+          "examplePhrases": [
+            "Alexa open MT Canvus",
+            "Alexa ask MT Canvus to load canvas zero on client one",
+            "Alexa ask MT Canvus to show my clients"
+          ],
+          "keywords": [],
+          "name": "MTCanvus",
+          "description": "Sample Full Description",
+          "smallIconUri": "file://assets/images/en-GB_smallIconUri.png",
+          "largeIconUri": "file://assets/images/en-GB_largeIconUri.png"
         }
-      },
-      "automaticDistribution": {
-        "isActive": false
       },
       "isAvailableWorldwide": true,
       "testingInstructions": "Sample Testing Instructions.",
@@ -54,6 +64,9 @@
       "allowsPurchases": false,
       "locales": {
         "en-US": {
+          "privacyPolicyUrl": "https://apps.multitaction.com/privacy.html"
+        },
+        "en-GB": {
           "privacyPolicyUrl": "https://apps.multitaction.com/privacy.html"
         }
       },
