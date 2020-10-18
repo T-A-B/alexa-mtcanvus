@@ -75,15 +75,20 @@ module.exports.getMTCanvusClients = async (userEnvData) => {
     //userEnvData.canvus_server_IP_address, e.g., canvus.example.com
     //userEnvData.canvus_client_id
     //userEnvData.canvus_API_auth_token
+    console.log('calling: ', `${userEnvData.canvus_server_IP_address}/api/v1/clients`);
     try{
         
-        const clients = await axios.get(`https://${userEnvData.canvus_server_IP_address}/api/v1/clients`, {
+        const clients = await axios.get(`${userEnvData.canvus_server_IP_address}/api/v1/clients`, {
             headers: {
                 'Private-Token': userEnvData.canvus_API_auth_token,
             },
         });
         
-        return clients;
+        if (clients.data.length === 0){
+            return {status:400, msg:"I couldn't find any client in the server"};
+        }
+        
+        return clients.data;
     }catch(e){
         console.log('Error occurred: ', e);
         return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
@@ -92,12 +97,15 @@ module.exports.getMTCanvusClients = async (userEnvData) => {
 
 module.exports.getMTCanvusClientWorkspaces = async (userEnvData, client_id) => {
     try{
-        const workspaces = await axios.get(`https://${userEnvData.canvus_server_IP_address}/api/v1/clients/${client_id}/workspaces`, {
+        const workspaces = await axios.get(`${userEnvData.canvus_server_IP_address}/api/v1/clients/${client_id}/workspaces`, {
             headers: {
                 'Private-Token': userEnvData.canvus_API_auth_token,
             },
         });
-        return workspaces;
+        if (workspaces.data.length === 0){
+            return {status:400, msg:"I couldn't find any workspace for that client in the server"};
+        }
+        return workspaces.data;
     }catch(e){
         console.log('Error occurred: ', e);
         return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
@@ -105,24 +113,34 @@ module.exports.getMTCanvusClientWorkspaces = async (userEnvData, client_id) => {
 }
 
 module.exports.getMTCanvusAlexaCanvases = async (userEnvData) => {
+    console.log("calling:", `${userEnvData.canvus_server_IP_address}/api/v1/canvas-folders`);
     try{
-        const canvasFolders = await axios.get(`https://${userEnvData.canvus_server_IP_address}/api/v1/canvas-folders`, {
+        const canvasFolders = await axios.get(`${userEnvData.canvus_server_IP_address}/api/v1/canvas-folders`, {
             headers: {
                 'Private-Token': userEnvData.canvus_API_auth_token,
             },
         });
         
+        console.log("canvasFolders: ", `${JSON.stringify(canvasFolders.data)}`);
         //get canvasFolder with .name==Alexa
-        const foundCanvasFolder = canvasFolders.find((canvas) => canvas.name === 'Alexa');
+        const foundCanvasFolder = canvasFolders.data.find((canvas) => canvas.name === 'Alexa');
+        
+        if (!foundCanvasFolder){
+            return {status:400, msg:`I couldn't find any canvas inside the Alexa folder. Please put the canvases you want to use inside a folder named Alexa and try again.`};
+        }
         
         //get canvases with folder_id
-        const canvases = await axios.get(`https://${userEnvData.canvus_server_IP_address}/api/v1/canvases`, {
+        const canvases = await axios.get(`${userEnvData.canvus_server_IP_address}/api/v1/canvases`, {
             headers: {
                 'Private-Token': userEnvData.canvus_API_auth_token,
             },
         });
         
-        const alexaCanvases = canvases.filter((canvas) => canvas.folder_id === foundCanvasFolder.folder_id);
+        const alexaCanvases = canvases.data.filter((canvas) => canvas.folder_id === foundCanvasFolder.id);
+        
+        if (alexaCanvases.length === 0){
+            return {status:400, msg:"I couldn't find any canvases in the server"};
+        }
         
         return alexaCanvases;
     }catch(e){
@@ -133,7 +151,7 @@ module.exports.getMTCanvusAlexaCanvases = async (userEnvData) => {
 
 module.exports.patchMTCanvusClientWorkspace = async (userEnvData, client_id, workspace_index, canvas_id) => {
     try{
-        const patchMTCanvusClientWorkspaceResult = await axios.patch(`https://${userEnvData.canvus_server_IP_address}/api/v1/clients/${client_id}/workspaces/${workspace_index}`, {
+        const patchMTCanvusClientWorkspaceResult = await axios.patch(`${userEnvData.canvus_server_IP_address}/api/v1/clients/${client_id}/workspaces/${workspace_index}`, {
             'canvas_id': canvas_id
         }, {
             headers: {
