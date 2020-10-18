@@ -6,8 +6,8 @@
           "summary": "Sample Short Description",
           "examplePhrases": [
             "Alexa open MT Canvus",
-            "Alexa ask MT Canvus to load canvas zero on client one",
-            "Alexa ask MT Canvus to show my clients"
+            "load canvas zero on client one",
+            "show my clients"
           ],
           "keywords": [],
           "name": "MTCanvus",
@@ -19,8 +19,8 @@
           "summary": "Sample Short Description",
           "examplePhrases": [
             "Alexa open MT Canvus",
-            "Alexa ask MT Canvus to load canvas zero on client one",
-            "Alexa ask MT Canvus to show my clients"
+            "load canvas zero on client one",
+            "show my clients"
           ],
           "keywords": [],
           "name": "MTCanvus",
@@ -28,6 +28,9 @@
           "smallIconUri": "file://assets/images/en-GB_smallIconUri.png",
           "largeIconUri": "file://assets/images/en-GB_largeIconUri.png"
         }
+      },
+      "automaticDistribution": {
+        "isActive": false
       },
       "isAvailableWorldwide": true,
       "testingInstructions": "Sample Testing Instructions.",
