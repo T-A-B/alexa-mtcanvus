@@ -46,7 +46,7 @@ module.exports.getApiSlots = (handlerInput) => {
 /*
 Auth0 methods
 */
-module.exports.getUserMetadata = async (accessToken) =>{
+const getUserMetadata = module.exports.getUserMetadata = async (accessToken) =>{
     try{
         const { data } = await axios.get('https://mtcanvus-user.us.auth0.com/userinfo/', {
             headers: {
@@ -91,7 +91,29 @@ module.exports.getMTCanvusClients = async (userEnvData) => {
         return clients.data;
     }catch(e){
         console.log('Error occurred: ', e);
-        return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
+        return {status:400, msg: `Couldn't connect to the server. Check that you provided a valid ip address and token. You can re enable this skill to update these value.`};
+    }
+}
+
+module.exports.getMTCanvusClientById = async (userEnvData) => {
+    console.log('calling: ', `${userEnvData.canvus_server_IP_address}/api/v1/clients/${userEnvData.canvus_client_id}`);
+    try{
+        
+        const client = await axios.get(`${userEnvData.canvus_server_IP_address}/api/v1/clients/${userEnvData.canvus_client_id}`, {
+            headers: {
+                'Private-Token': userEnvData.canvus_API_auth_token,
+            },
+        });
+        
+        if (client.data.msg){
+            return {status:400, msg:"I couldn't find the default client in the server"};
+        }
+        
+        client.data.status = 200;
+        return client.data;
+    }catch(e){
+        console.log('Error occurred: ', e);
+        return {status:400, msg: `Couldn't connect to the server. Check that you provided a valid ip address and token. You can re enable this skill to update these value.`};
     }
 }
 
@@ -108,7 +130,7 @@ module.exports.getMTCanvusClientWorkspaces = async (userEnvData, client_id) => {
         return workspaces.data;
     }catch(e){
         console.log('Error occurred: ', e);
-        return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
+        return {status:400, msg: `Couldn't connect to the server. Check that you provided a valid ip address and token. You can re enable this skill to update these value.`};
     }
 }
 
@@ -145,7 +167,7 @@ module.exports.getMTCanvusAlexaCanvases = async (userEnvData) => {
         return alexaCanvases;
     }catch(e){
         console.log('Error occurred: ', e);
-        return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
+        return {status:400, msg: `Couldn't connect to the server. Check that you provided a valid ip address and token. You can re enable this skill to update these value.`};
     }
 }
 
@@ -164,6 +186,45 @@ module.exports.patchMTCanvusClientWorkspace = async (userEnvData, client_id, wor
         return patchMTCanvusClientWorkspaceResult;
     }catch(e){
         console.log('Error occurred: ', e);
-        return {status:400, msg: `Couldn't establish connection to ${userEnvData.canvus_server_IP_address}. Check that this is the correct server IP address. You can re enable this skill to update this value.`};
+        return {status:400, msg: `Couldn't connect to the server. Check that you provided a valid ip address and token. You can re enable this skill to update these value.`};
+    }
+}
+
+/*
+SessionAttributes utils
+*/
+module.exports.checkSessionAttributes = async (handlerInput) => {
+    try{
+        let sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        console.log('session',sessionAttributes);
+        let accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
+        console.log('accessToken',accessToken);
+        if (Object.keys(sessionAttributes).length === 0 && sessionAttributes.constructor === Object){
+            if (!accessToken){
+                console.log('no access token');
+                return {
+                    status: 400,
+                    response: handlerInput.responseBuilder
+                        .speak('Your access token has expired, please re enable the skill to enter the data again')
+                        .withLinkAccountCard()
+                        .getResponse()
+                }
+            }
+            console.log('getting user metadata');
+            const getUserMetadataResponse = await getUserMetadata(accessToken);
+            console.log('usermetadata: ',getUserMetadataResponse);
+            sessionAttributes.canvus_server_IP_address = getUserMetadataResponse.data.user_metadata.canvus_server_IP_address;
+            sessionAttributes.canvus_client_id = getUserMetadataResponse.data.user_metadata.canvus_client_id;
+            sessionAttributes.canvus_API_auth_token = getUserMetadataResponse.data.user_metadata.canvus_API_auth_token;
+            handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        }
+        console.log('checkSessionAttributes returning sessionAttributes: ',sessionAttributes);
+        return {sessionAttributes: sessionAttributes, status:200};
+    }catch(e){
+        console.log('Error occurred: ', e);
+        return {status:400, response: handlerInput.responseBuilder
+                        .speak(`An error has occurred when accessing you account linking information.`)
+                        .withLinkAccountCard()
+                        .getResponse()};
     }
 }

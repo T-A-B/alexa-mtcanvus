@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "m. t. canvus",
+      "invocationName": "canvus loader",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -130,6 +130,7 @@
           "name": "ShowClients",
           "slots": [],
           "samples": [
+            "list clients",
             "what are my clients",
             "list my clients",
             "show my clients",
@@ -148,9 +149,24 @@
             }
           ],
           "samples": [
+            "list workspaces",
+            "list my workspaces",
             "show my workspaces",
             "show my client {clientNumber} workspaces",
             "What are client {clientNumber} workspaces"
+          ]
+        },
+        {
+          "name": "LoadCanvas",
+          "slots": [
+            {
+              "name": "canvusNumber",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "load canvas {canvusNumber}",
+            "load canvus {canvusNumber}"
           ]
         }
       ],
@@ -280,6 +296,22 @@
               }
             }
           ]
+        },
+        {
+          "name": "LoadCanvas",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.3357668366"
+          },
+          "slots": [
+            {
+              "name": "canvusNumber",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
         }
       ],
       "delegationStrategy": "ALWAYS"
@@ -365,8 +397,17 @@
             "value": "What is the index of the canvas you want to load?"
           }
         ]
+      },
+      {
+        "id": "Confirm.Intent.3357668366",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are you sure you want to load canvus {canvusNumber}"
+          }
+        ]
       }
     ]
   },
-  "version": "9"
+  "version": "12"
 }

@@ -18,43 +18,12 @@ const LaunchRequestHandler = {
     },
     async handle(handlerInput) {
         let speakOutput = 'Welcome. You can ask me to show your clients, your workspaces and your canvases, or to load a canvas on a client, workspace or all clients';
-        console.log('preacces token');
-        let accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
-        console.log('ACCESS TOKEN: ', accessToken);
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         
-        if (!accessToken){
-            return handlerInput.responseBuilder
-                .speak('Your access token has expired, please re enable the skill to enter the data again')
-                .withLinkAccountCard()
-                .getResponse();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        console.log('checkSessionAttributesResponse: ',checkSessionAttributesResponse);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
         }
-        
-        /*
-        auth0WebAuth = new Auth0.WebAuth({
-            domain: 'mtcanvus-user.us.auth0.com',
-            clientID: 'bq2LhI49JvMysMcLkXeY3kKsXjrHqPEW',
-            audience: 'https%3A%2F%2Fmtcanvus-user.us.auth0.com%2Fapi%2Fv2%2F',
-            scope: 'read:current_user'
-        });
-        
-        auth0Management = new Auth0.Management({
-          domain: 'mtcanvus-user.us.auth0.com',
-          token: accessToken
-        });
-        console.log('Launch Management: ',auth0Management);
-        */
-        
-        const getUserMetadataResponse = await util.getUserMetadata(accessToken);
-        console.log('user metadata: ',getUserMetadataResponse.data.user_metadata);
-        
-        sessionAttributes.canvus_server_IP_address = getUserMetadataResponse.data.user_metadata.canvus_server_IP_address;
-        sessionAttributes.canvus_client_id = getUserMetadataResponse.data.user_metadata.canvus_client_id;
-        sessionAttributes.canvus_API_auth_token = getUserMetadataResponse.data.user_metadata.canvus_API_auth_token;
-        
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-        
-        console.log('session attributes: ', sessionAttributes);
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -92,7 +61,7 @@ const UnlinkAccountIntentHandler = {
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            //.reprompt('')
             .getResponse();
     }
 };
@@ -105,7 +74,11 @@ const ShowClientWorkspacesHandler = {
     async handle(handlerInput) {
         const slots = Alexa.getSlot(handlerInput.requestEnvelope, 'clientNumber');
         const clientNumber = slots.value;
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         let foundClient = null;
         
         let speakOutput = `These are client ${clientNumber} workspaces.`;
@@ -135,6 +108,7 @@ const ShowClientWorkspacesHandler = {
   }
 ];
 */
+
             sessionAttributes.clients = getMTCanvusClientsResponse;
         }
         
@@ -146,11 +120,11 @@ const ShowClientWorkspacesHandler = {
         }
         
         sessionAttributes.clients.map((client, i) => {
-            clientList += ` ${i}, ${client.installation_name}.`;
+            clientList += ` ${i+1}, ${client.installation_name}.`;
         });
         
         //get client_id from input client index
-        foundClient = sessionAttributes.clients[clientNumber];
+        foundClient = sessionAttributes.clients[clientNumber-1];
         
         //example client_id = 4dc1eba7-3788-4fd3-b909-e2cdf018e50b
         if (foundClient){
@@ -165,7 +139,7 @@ const ShowClientWorkspacesHandler = {
       "height": 5400,
       "width": 9600
     },
-    "index": 0,
+    "index": 1,
     "info_panel_visible": true,
     "location": {
       "x": 0,
@@ -191,7 +165,7 @@ const ShowClientWorkspacesHandler = {
       "height": 5400,
       "width": 9600
     },
-    "index": 1,
+    "index": 0,
     "info_panel_visible": true,
     "location": {
       "x": 750,
@@ -221,8 +195,11 @@ const ShowClientWorkspacesHandler = {
                     .withShouldEndSession(true)
                     .getResponse();
             }
+            workspaces.sort((w1, w2) => {
+              return w1.index - w2.index;
+            });
             workspaces.map((workspace, i) => {
-                workspaceList += ` ${workspace.index}, ${workspace.workspace_name}.`;
+                workspaceList += ` ${workspace.index+1}, ${workspace.workspace_name}.`;
             });
             speakOutput += workspaceList;
         }else{
@@ -236,7 +213,7 @@ const ShowClientWorkspacesHandler = {
         return handlerInput.responseBuilder
             .speak(speakOutput)
             //.reprompt('')
-            .withShouldEndSession(true)
+            .withShouldEndSession(false)
             .getResponse();
     }
 };
@@ -247,7 +224,13 @@ const ShowClientsHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ShowClients';
     },
     async handle(handlerInput) {
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
+        
         let speakOutput = 'These are the clients.';
         
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
@@ -271,6 +254,7 @@ const ShowClientsHandler = {
   }
 ];
 */
+
         if (clients.status === 400){
             return handlerInput.responseBuilder
                 .speak(`${clients.msg}`)
@@ -280,13 +264,13 @@ const ShowClientsHandler = {
         
         console.log('retrieved clients: ',clients);
         clients.map((client, i) => {
-            speakOutput += ` ${i}, ${client.installation_name}.`;
+            speakOutput += ` ${i+1}, ${client.installation_name}.`;
         });
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
             //.reprompt('')
-            .withShouldEndSession(true)
+            .withShouldEndSession(false)
             .getResponse();
     }
 };
@@ -297,7 +281,11 @@ const ShowCanvasesHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ShowCanvases';
     },
     async handle(handlerInput) {
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         let speakOutput = 'These are your canvases.';
         
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
@@ -334,13 +322,13 @@ const ShowCanvasesHandler = {
                 .getResponse();
         }
         alexaCanvases.map((alexaCanvas, i) => {
-            speakOutput += ` ${i}, ${alexaCanvas.name}.`;
+            speakOutput += ` ${i+1}, ${alexaCanvas.name}.`;
         });
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
             //.reprompt('')
-            .withShouldEndSession(true)
+            .withShouldEndSession(false)
             .getResponse();
     }
 };
@@ -351,7 +339,11 @@ const LoadCanvasOnClientWorkspaceHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LoadCanvasOnClientWorkspace';
     },
     async handle(handlerInput) {
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         const clientNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'clientNumber');
         const workspaceNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'workspaceNumber');
         const canvasNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'canvasNumber');
@@ -397,10 +389,10 @@ const LoadCanvasOnClientWorkspaceHandler = {
                 .getResponse();
         }
         clients.map((client, i) => {
-            clientList += ` ${i}, ${client.installation_name}.`;
+            clientList += ` ${i+1}, ${client.installation_name}.`;
         });
         //check client index
-        foundClient = clients[clientNumber];
+        foundClient = clients[clientNumber-1];
         
         if (!foundClient){
             return handlerInput.responseBuilder
@@ -475,11 +467,14 @@ const LoadCanvasOnClientWorkspaceHandler = {
                 .withShouldEndSession(true)
                 .getResponse();
         }
+        workspaces.sort((w1, w2) => {
+            return w1.index - w2.index;
+        });
         workspaces.map((workspace, i) => {
-            workspaceList += ` ${workspace.index}, ${workspace.workspace_name}.`;
+            workspaceList += ` ${workspace.index+1}, ${workspace.workspace_name}.`;
         });
         //check workspace index
-        foundWorkspace = workspaces[workspaceNumber];
+        foundWorkspace = workspaces[workspaceNumber-1];
         if (!foundWorkspace){
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${workspaceNumber} is not a valid workspace index. Valid workspaces are ${workspaceList} Say the number of the workspace you want to load the canvas on.`)
@@ -514,10 +509,10 @@ const LoadCanvasOnClientWorkspaceHandler = {
                 .getResponse();
         }
         canvases.map((canvas, i) => {
-            canvasList += ` ${i}, ${canvas.name}.`;
+            canvasList += ` ${i+1}, ${canvas.name}.`;
         });
         //check canvas index existance
-        foundCanvas = canvases[canvasNumber];
+        foundCanvas = canvases[canvasNumber-1];
         if (!foundCanvas){
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${canvasNumber} is not a valid canvas index. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
@@ -555,7 +550,11 @@ const LoadCanvasOnClientHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LoadCanvasOnClient';
     },
     async handle(handlerInput) {
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         const clientNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'clientNumber');
         const canvasNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'canvasNumber');
         const clientNumber = clientNumberSlot.value;
@@ -597,10 +596,10 @@ const LoadCanvasOnClientHandler = {
                 .getResponse();
         }
         clients.map((client, i) => {
-            clientList += ` ${i}, ${client.installation_name}.`;
+            clientList += ` ${i+1}, ${client.installation_name}.`;
         });
         //check client index
-        foundClient = clients[clientNumber];
+        foundClient = clients[clientNumber-1];
         if (!foundClient){
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${clientNumber} is not a valid client index. Valid clients are ${clientList} Say the number of the client you want to load the canvas on.`)
@@ -635,10 +634,10 @@ const LoadCanvasOnClientHandler = {
                 .getResponse();
         }
         canvases.map((canvas, i) => {
-            canvasList += ` ${i}, ${canvas.name}.`;
+            canvasList += ` ${i+1}, ${canvas.name}.`;
         });
         //check canvas index existance
-        foundCanvas = canvases[canvasNumber];
+        foundCanvas = canvases[canvasNumber-1];
         if (!foundCanvas){
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${canvasNumber} is not a valid canvas index. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
@@ -667,13 +666,109 @@ const LoadCanvasOnClientHandler = {
     }
 };
 
+const LoadCanvasHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LoadCanvas';
+    },
+    async handle(handlerInput) {
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
+        
+        const canvasNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'canvusNumber');
+        const canvasNumber = canvasNumberSlot.value;
+        
+        let foundClient = null;
+        let foundCanvas = null;
+        let canvasList = "";
+        
+        let updatedWorkspace
+        let errorCount = 0;
+        
+        let speakOutput;
+        
+        if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
+            return handlerInput.responseBuilder
+                .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
+                //.reprompt('')
+                .withShouldEndSession(false)
+                .getResponse();
+        }
+        
+        foundClient = await util.getMTCanvusClientById(sessionAttributes);
+        
+        const canvases = await util.getMTCanvusAlexaCanvases(sessionAttributes);
+        
+        if (canvases.status === 400){
+            return handlerInput.responseBuilder
+                .speak(`${canvases.msg}`)
+                .withShouldEndSession(true)
+                .getResponse();
+        }
+        canvases.map((canvas, i) => {
+            canvasList += ` ${i+1}, ${canvas.name}.`;
+        });
+        foundCanvas = canvases[canvasNumber-1];
+        if (!foundCanvas){
+            return handlerInput.responseBuilder
+                .speak(`Sorry, ${canvasNumber} is not a valid canvas index. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
+                .reprompt(`None of the canvases match the index you provided. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
+                .addElicitSlotDirective('canvasNumber')
+                .getResponse();
+        }
+        
+        if (foundClient.status === 400){
+            //TODO load on all clients?
+            if (updatedWorkspace.status === 200){
+                speakOutput = `Canvus ${foundCanvas.name} has been loaded on client ${foundClient.installation_name}.`;
+            }else{
+                speakOutput = `There was an error while updating the workspace`;
+            }
+        }else{
+            const workspaces = await util.getMTCanvusClientWorkspaces(sessionAttributes, foundClient.id);
+            if (workspaces.status === 400){
+                return handlerInput.responseBuilder
+                    .speak(`${workspaces.msg}`)
+                    .withShouldEndSession(true)
+                    .getResponse();
+            }
+            
+            for (let i = 0; i < workspaces.length; i++) {
+                updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, foundClient.id, workspaces[i].index, foundCanvas.id);
+                if (updatedWorkspace.status === 400){
+                    errorCount += 1;
+                }
+            }
+            
+            if (errorCount > 0){
+                speakOutput = `There was an error while updating ${errorCount} workspaces`;
+            }else{
+                speakOutput = `Canvus ${foundCanvas.name} has been successfully loaded on client ${foundClient.installation_name}.`;
+            }
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            //.reprompt('')
+            .withShouldEndSession(true)
+            .getResponse();
+    }
+};
+
 const LoadCanvasAllHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LoadCanvasAll';
     },
     async handle(handlerInput) {
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
+        if (checkSessionAttributesResponse.status === 400){
+            return checkSessionAttributesResponse.response;
+        }
+        const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         
         const canvasNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'canvasNumber');
         const canvasNumber = canvasNumberSlot.value;
@@ -740,10 +835,10 @@ const LoadCanvasAllHandler = {
                 .getResponse();
         }
         canvases.map((canvas, i) => {
-            canvasList += ` ${i}, ${canvas.name}.`;
+            canvasList += ` ${i+1}, ${canvas.name}.`;
         });
         //check canvas index existance
-        foundCanvas = canvases[canvasNumber];
+        foundCanvas = canvases[canvasNumber-1];
         if (!foundCanvas){
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${canvasNumber} is not a valid canvas index. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
