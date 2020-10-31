@@ -48,14 +48,14 @@ Auth0 methods
 */
 const getUserMetadata = module.exports.getUserMetadata = async (accessToken) =>{
     try{
-        const { data } = await axios.get('https://mtcanvus-user.us.auth0.com/userinfo/', {
+        const { data } = await axios.get('https://canvuscontrol.eu.auth0.com/userinfo/', {
             headers: {
                 authorization: 'Bearer ' + accessToken,
             },
         });
         console.log('utils>USERDATA',data);
         
-        const userdata = await axios.get(`https://mtcanvus-user.us.auth0.com/api/v2/users/${data.sub}`, {
+        const userdata = await axios.get(`https://canvuscontrol.eu.auth0.com/api/v2/users/${data.sub}`, {
             headers: {
                 authorization: 'Bearer ' + accessToken,
             },

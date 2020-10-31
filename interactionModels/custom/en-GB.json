@@ -56,9 +56,15 @@
             {
               "name": "allClients",
               "type": "allClients"
+            },
+            {
+              "name": "allWorkspaces",
+              "type": "allWorkspaces"
             }
           ],
           "samples": [
+            "i want to load canvas number {canvasNumber} on {allClients} on {allWorkspaces}",
+            "load canvas {canvasNumber} on {allClients} on {allWorkspaces}",
             "i want to load canvas number {canvasNumber} on {allClients}",
             "load canvas {canvasNumber} on {allClients}"
           ]
@@ -185,6 +191,36 @@
             }
           ],
           "name": "allClients"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "every workspace"
+              }
+            },
+            {
+              "name": {
+                "value": "all workspaces"
+              }
+            }
+          ],
+          "name": "allWorkspaces"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "no"
+              }
+            },
+            {
+              "name": {
+                "value": "yes"
+              }
+            }
+          ],
+          "name": "confirm"
         }
       ],
       "modelConfiguration": {
@@ -197,10 +233,8 @@
       "intents": [
         {
           "name": "LoadCanvasAll",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.1010034783214"
-          },
+          "confirmationRequired": false,
+          "prompts": {},
           "slots": [
             {
               "name": "canvasNumber",
@@ -217,15 +251,20 @@
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
+            },
+            {
+              "name": "allWorkspaces",
+              "type": "allWorkspaces",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
             }
           ]
         },
         {
           "name": "LoadCanvasOnClient",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.406156848746"
-          },
+          "confirmationRequired": false,
+          "prompts": {},
           "slots": [
             {
               "name": "canvasNumber",
@@ -263,10 +302,8 @@
         },
         {
           "name": "LoadCanvasOnClientWorkspace",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.1570363150497"
-          },
+          "confirmationRequired": false,
+          "prompts": {},
           "slots": [
             {
               "name": "canvasNumber",
@@ -299,10 +336,8 @@
         },
         {
           "name": "LoadCanvas",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.3357668366"
-          },
+          "confirmationRequired": false,
+          "prompts": {},
           "slots": [
             {
               "name": "canvusNumber",
@@ -322,7 +357,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "are you sure you want to load canvas {canvasNumber} on all clients?"
+            "value": "asd"
           }
         ]
       },
@@ -409,5 +444,5 @@
       }
     ]
   },
-  "version": "3"
+  "version": "4"
 }

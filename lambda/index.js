@@ -89,7 +89,6 @@ const ShowClientWorkspacesHandler = {
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
             return handlerInput.responseBuilder
                 .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
-                //.reprompt('')
                 .withShouldEndSession(false)
                 .getResponse();
         }
@@ -212,7 +211,6 @@ const ShowClientWorkspacesHandler = {
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(false)
             .getResponse();
     }
@@ -269,7 +267,6 @@ const ShowClientsHandler = {
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(false)
             .getResponse();
     }
@@ -327,7 +324,6 @@ const ShowCanvasesHandler = {
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(false)
             .getResponse();
     }
@@ -362,7 +358,6 @@ const LoadCanvasOnClientWorkspaceHandler = {
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
             return handlerInput.responseBuilder
                 .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
-                //.reprompt('')
                 .withShouldEndSession(false)
                 .getResponse();
         }
@@ -370,17 +365,7 @@ const LoadCanvasOnClientWorkspaceHandler = {
         console.log('LoadCanvasOnClientHandler: ', `Loading canvas ${canvasNumber} on client ${clientNumber} workspace ${workspaceNumber}`)
         //get clients
         const clients = await util.getMTCanvusClients(sessionAttributes);
-        /*
-        const clients = [
-  {
-    "access": "rw",
-    "id": "4dc1eba7-3788-4fd3-b909-e2cdf018e50b",
-    "installation_name": "igor-pc",
-    "state": "normal",
-    "version": "2.7.1 [28f1b0e05]"
-  }
-];
-*/
+        
         console.log('retrieved clients: ',clients);
         if (clients.status === 400){
             return handlerInput.responseBuilder
@@ -404,62 +389,7 @@ const LoadCanvasOnClientWorkspaceHandler = {
         
         //get client's workspace
         const workspaces = await util.getMTCanvusClientWorkspaces(sessionAttributes, foundClient.id);
-        /*
-        const workspaces = [
-  {
-    "canvas_id": "f1a30b39-74d6-46dd-bbb1-a4236d09362e",
-    "canvas_size": {
-      "height": 5400,
-      "width": 9600
-    },
-    "index": 0,
-    "info_panel_visible": true,
-    "location": {
-      "x": 0,
-      "y": 0
-    },
-    "pinned": false,
-    "size": {
-      "height": 864,
-      "width": 750
-    },
-    "state": "normal",
-    "view_rectangle": {
-      "height": 864,
-      "width": 750,
-      "x": 4032,
-      "y": 2268
-    },
-    "workspace_name": "Workspace 1"
-  },
-  {
-    "canvas_id": "a5739954-95da-4d97-ad46-4886c137a791",
-    "canvas_size": {
-      "height": 5400,
-      "width": 9600
-    },
-    "index": 1,
-    "info_panel_visible": true,
-    "location": {
-      "x": 750,
-      "y": 0
-    },
-    "pinned": false,
-    "size": {
-      "height": 864,
-      "width": 786
-    },
-    "state": "normal",
-    "view_rectangle": {
-      "height": 1800,
-      "width": 1637.5,
-      "x": 3981.25,
-      "y": 1800
-    },
-    "workspace_name": "Workspace 2"
-  }
-];
-*/
+        
         console.log('retrieved workspaces: ',workspaces);
         if (workspaces.status === 400){
             return handlerInput.responseBuilder
@@ -485,22 +415,7 @@ const LoadCanvasOnClientWorkspaceHandler = {
         
         //get alexa canvases
         const canvases = await util.getMTCanvusAlexaCanvases(sessionAttributes);
-        /*
-        const canvases = [
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "e154a7c3-ffbf-4602-ac6b-e319706cd902",
-    "name": "New canvas",
-    "state": "normal"
-  },
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "5615d165-44b1-4772-805e-7f1344639ba7",
-    "name": "New canvas (1)",
-    "state": "normal"
-  }
-];
-*/
+        
         console.log('retrieved canvases: ',canvases);
         if (canvases.status === 400){
             return handlerInput.responseBuilder
@@ -521,10 +436,19 @@ const LoadCanvasOnClientWorkspaceHandler = {
                 .getResponse();
         }
         
+        if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'NONE'){
+            const confirmMsg = `Are you sure you want to load canvus ${foundCanvas.name} on ${foundClient.installation_name} on ${foundWorkspace.workspace_name}`;
+            return handlerInput.responseBuilder
+                .speak(confirmMsg)
+                .reprompt(confirmMsg)
+                .addConfirmIntentDirective()
+                .getResponse();
+        }
+        
         
         //patch patchMTCanvusClientWorkspace
         const updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, foundClient.id, foundWorkspace.index, foundCanvas.id);
-        //const updatedWorkspace = {status: 200};
+        
         console.log(`..updating workspace ${foundWorkspace.index} client ${foundClient.id} with ${foundCanvas.id}`);
         
         console.log('retrieved updatedWorkspace: ',updatedWorkspace);
@@ -538,7 +462,6 @@ const LoadCanvasOnClientWorkspaceHandler = {
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(true)
             .getResponse();
     }
@@ -570,24 +493,13 @@ const LoadCanvasOnClientHandler = {
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
             return handlerInput.responseBuilder
                 .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
-                //.reprompt('')
                 .withShouldEndSession(false)
                 .getResponse();
         }
         
         //get clients
         const clients = await util.getMTCanvusClients(sessionAttributes);
-        /*
-        const clients = [
-  {
-    "access": "rw",
-    "id": "4dc1eba7-3788-4fd3-b909-e2cdf018e50b",
-    "installation_name": "igor-pc",
-    "state": "normal",
-    "version": "2.7.1 [28f1b0e05]"
-  }
-];
-*/
+        
         console.log('retrieved clients: ',clients);
         if (clients.status === 400){
             return handlerInput.responseBuilder
@@ -610,22 +522,7 @@ const LoadCanvasOnClientHandler = {
         
         //get alexa canvases
         const canvases = await util.getMTCanvusAlexaCanvases(sessionAttributes);
-        /*
-        const canvases = [
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "e154a7c3-ffbf-4602-ac6b-e319706cd902",
-    "name": "New canvas",
-    "state": "normal"
-  },
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "5615d165-44b1-4772-805e-7f1344639ba7",
-    "name": "New canvas (1)",
-    "state": "normal"
-  }
-];
-*/
+        
         console.log('retrieved canvases: ',canvases);
         if (canvases.status === 400){
             return handlerInput.responseBuilder
@@ -646,9 +543,17 @@ const LoadCanvasOnClientHandler = {
                 .getResponse();
         }
         
-        //patch with workspace 0.
+        if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'NONE'){
+            const confirmMsg = `Are you sure you want to load canvus ${foundCanvas.name} on ${foundClient.installation_name}`;
+            return handlerInput.responseBuilder
+                .speak(confirmMsg)
+                .reprompt(confirmMsg)
+                .addConfirmIntentDirective()
+                .getResponse();
+        }
+        
         const updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, foundClient.id, 0, foundCanvas.id);
-        //const updatedWorkspace = {status: 200};
+        
         console.log(`..updating client ${foundClient.id} with ${foundCanvas.id}`);
         console.log('retrieved updatedWorkspace: ',updatedWorkspace);
         
@@ -660,7 +565,6 @@ const LoadCanvasOnClientHandler = {
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(true)
             .getResponse();
     }
@@ -693,7 +597,6 @@ const LoadCanvasHandler = {
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
             return handlerInput.responseBuilder
                 .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
-                //.reprompt('')
                 .withShouldEndSession(false)
                 .getResponse();
         }
@@ -701,7 +604,7 @@ const LoadCanvasHandler = {
         foundClient = await util.getMTCanvusClientById(sessionAttributes);
         
         const canvases = await util.getMTCanvusAlexaCanvases(sessionAttributes);
-        
+  
         if (canvases.status === 400){
             return handlerInput.responseBuilder
                 .speak(`${canvases.msg}`)
@@ -716,19 +619,25 @@ const LoadCanvasHandler = {
             return handlerInput.responseBuilder
                 .speak(`Sorry, ${canvasNumber} is not a valid canvas index. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
                 .reprompt(`None of the canvases match the index you provided. Valid canvases are ${canvasList} Say the number of the canvas you want to load.`)
-                .addElicitSlotDirective('canvasNumber')
+                .addElicitSlotDirective('canvusNumber')
                 .getResponse();
         }
         
         if (foundClient.status === 400){
-            //TODO load on all clients?
-            if (updatedWorkspace.status === 200){
-                speakOutput = `Canvus ${foundCanvas.name} has been loaded on client ${foundClient.installation_name}.`;
-            }else{
-                speakOutput = `There was an error while updating the workspace`;
-            }
+            return handlerInput.responseBuilder
+                .speak(`Sorry, The default client i. d. you provided is not valid.`)
+                .getResponse();
         }else{
+            if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'NONE'){
+                const confirmMsg = `Are you sure you want to load canvus ${foundCanvas.name} on ${foundClient.installation_name}`;
+                return handlerInput.responseBuilder
+                    .speak(confirmMsg)
+                    .reprompt(confirmMsg)
+                    .addConfirmIntentDirective()
+                    .getResponse();
+            }
             const workspaces = await util.getMTCanvusClientWorkspaces(sessionAttributes, foundClient.id);
+            
             if (workspaces.status === 400){
                 return handlerInput.responseBuilder
                     .speak(`${workspaces.msg}`)
@@ -738,6 +647,7 @@ const LoadCanvasHandler = {
             
             for (let i = 0; i < workspaces.length; i++) {
                 updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, foundClient.id, workspaces[i].index, foundCanvas.id);
+                
                 if (updatedWorkspace.status === 400){
                     errorCount += 1;
                 }
@@ -752,7 +662,6 @@ const LoadCanvasHandler = {
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(true)
             .getResponse();
     }
@@ -771,62 +680,71 @@ const LoadCanvasAllHandler = {
         const sessionAttributes = checkSessionAttributesResponse.sessionAttributes;
         
         const canvasNumberSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'canvasNumber');
+        const allClientsSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'allClients');
+        const allWorkspacesSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'allWorkspaces');
+        
+        const isCustomConfirmedSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'isCustomConfirmed');
+        console.log('canvasNumberSlot : ',canvasNumberSlot);
+        console.log('allClientsSlot : ',allClientsSlot);
+        console.log('allWorkspacesSlot : ',allWorkspacesSlot);
+        console.log('isCustomConfirmedSlot : ',isCustomConfirmedSlot);
         const canvasNumber = canvasNumberSlot.value;
+        const allClients = allClientsSlot.value;
+        const allWorkspaces = allWorkspacesSlot.value;
+        const isCustomConfirmed = isCustomConfirmedSlot ? isCustomConfirmedSlot.value : null;
+        console.log('customconfirmed post .values.');
+        
         let foundCanvas = null;
+        let foundClient = null;
         let canvasList = "";
         
         let speakOutput;
         
-        let updatedWorkspace
+        let updatedWorkspace;
+        let workspaces;
         let errorCount = 0;
+        
+        console.log('isCustomConfirmed? ', isCustomConfirmed);
+        console.log('confirmationstatus? ', handlerInput.requestEnvelope.request.intent.confirmationStatus);
         
         if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'DENIED'){
             return handlerInput.responseBuilder
                 .speak("Okay. Tell me if there is something else you need or say stop to end the session.")
-                //.reprompt('')
                 .withShouldEndSession(false)
                 .getResponse();
         }
         
-        //get client list.
-        const clients = await util.getMTCanvusClients(sessionAttributes);
-        /*
-        const clients = [
-  {
-    "access": "rw",
-    "id": "4dc1eba7-3788-4fd3-b909-e2cdf018e50b",
-    "installation_name": "igor-pc",
-    "state": "normal",
-    "version": "2.7.1 [28f1b0e05]"
-  }
-];
-*/
-        console.log('retrieved clients: ',clients);
-        if (clients.status === 400){
-            return handlerInput.responseBuilder
-                .speak(`${clients.msg}`)
-                .withShouldEndSession(true)
-                .getResponse();
+        
+        if (!allClients && !allWorkspaces){
+            console.log("no clients no workspaces");
+            const responseDelegate = {
+                directives: [
+                    {
+                        "type": "Dialog.DelegateRequest",
+                        "target": "skill",
+                        "period": {
+                            "until": "EXPLICIT_RETURN"
+                        },
+                        "updatedRequest": {
+                            "type": "IntentRequest",
+                            "intent": {
+                                "name": "LoadCanvas",
+                                "slots": {
+                                    "canvusNumber": {
+                                        "name": "canvusNumber",
+                                        "value": canvasNumber
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+            return responseDelegate;
         }
         
-        //get alexa canvases
         const canvases = await util.getMTCanvusAlexaCanvases(sessionAttributes);
-        /*
-        const canvases = [
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "e154a7c3-ffbf-4602-ac6b-e319706cd902",
-    "name": "New canvas",
-    "state": "normal"
-  },
-  {
-    "folder_id": "83af78c8-65a3-41d0-9873-916e4adc0ea4",
-    "id": "5615d165-44b1-4772-805e-7f1344639ba7",
-    "name": "New canvas (1)",
-    "state": "normal"
-  }
-];
-*/
+        
         console.log('retrieved canvases: ',canvases);
         if (canvases.status === 400){
             return handlerInput.responseBuilder
@@ -837,7 +755,6 @@ const LoadCanvasAllHandler = {
         canvases.map((canvas, i) => {
             canvasList += ` ${i+1}, ${canvas.name}.`;
         });
-        //check canvas index existance
         foundCanvas = canvases[canvasNumber-1];
         if (!foundCanvas){
             return handlerInput.responseBuilder
@@ -847,29 +764,179 @@ const LoadCanvasAllHandler = {
                 .getResponse();
         }
         
-        //loop through clients and make patch request with workspace 0
-        for (let index = 0; index < clients.length; index++) {
-            updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, clients[index].id, 0, foundCanvas.id);
-            //updatedWorkspace = {status:200};
-            console.log(`..updating client ${clients[index].id} with ${foundCanvas.id}`);
-            console.log('retrieved updatedWorkspace: ',updatedWorkspace);
-            
-            if (updatedWorkspace.status === 400){
-                errorCount += 1;
-            }
+        const clients = await util.getMTCanvusClients(sessionAttributes);
+  
+        console.log('retrieved clients: ',clients);
+        if (clients.status === 400){
+            return handlerInput.responseBuilder
+                .speak(`${clients.msg}`)
+                .withShouldEndSession(true)
+                .getResponse();
         }
         
+        foundClient = clients.filter(client => client.id === sessionAttributes.canvus_client_id);
+        
+        if (handlerInput.requestEnvelope.request.intent.confirmationStatus === 'NONE'){
+            let confirmMsg = `Are you sure you want to load canvus ${foundCanvas.name} on`;
+            if (allClients){
+                confirmMsg += ` ${allClients}`;
+                if (allWorkspaces){
+                    confirmMsg += ` and ${allWorkspaces}?`;
+                }else{
+                    confirmMsg += ` workspace zero?`;
+                }
+            }else{
+                if (allWorkspaces){
+                    if (Object.keys(foundClient).length === 0 && foundClient.constructor === Object){
+                        confirmMsg += ` ${foundClient.installation_name} on all workspaces?`;
+                    }else{
+                        return handlerInput.responseBuilder
+                            .speak(`Sorry, The default client i. d. you provided is not valid.`)
+                            .getResponse();
+                    }
+                    
+                }
+            }
+            return handlerInput.responseBuilder
+                .speak(confirmMsg)
+                .reprompt(confirmMsg)
+                .addConfirmIntentDirective()
+                .getResponse();
+        }
+        
+        if (allClients){
+            console.log("all clients");
+            
+            const clients = await util.getMTCanvusClients(sessionAttributes);
+  
+            console.log('retrieved clients: ',clients);
+            if (clients.status === 400){
+                return handlerInput.responseBuilder
+                    .speak(`${clients.msg}`)
+                    .withShouldEndSession(true)
+                    .getResponse();
+            }
+            if (allWorkspaces){
+                console.log("all workspaces");
+                
+                for (let index = 0; index < clients.length; index++) {
+                    workspaces = await util.getMTCanvusClientWorkspaces(sessionAttributes, clients[index].id);
+                    
+                    console.log('retrieved workspaces: ',workspaces);
+                    if (workspaces.status === 400){
+                        return handlerInput.responseBuilder
+                            .speak(`${workspaces.msg}`)
+                            .withShouldEndSession(true)
+                            .getResponse();
+                    }
+                    for (let j = 0; j < workspaces.length; j++) {
+                        updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, clients[index].id, workspaces[j].index, foundCanvas.id);
+                        console.log(`updating client ${clients[index].id} with ${foundCanvas.id}`);
+                        
+                        if (updatedWorkspace.status === 400){
+                            errorCount += 1;
+                        }
+                    }
+                }
+            }else{
+                console.log("workspace 0");
+                for (let index = 0; index < clients.length; index++) {
+                    updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, clients[index].id, 0, foundCanvas.id);
+                    console.log(`updating client ${clients[index].id} with ${foundCanvas.id}`);
+                    if (updatedWorkspace.status === 400){
+                        errorCount += 1;
+                    }
+                }
+                
+            }
+        } else {
+            console.log("default client");
+            if (allWorkspaces){
+                console.log("all workspaces");
+                workspaces = await util.getMTCanvusClientWorkspaces(sessionAttributes, sessionAttributes.canvus_client_id);
+                
+                console.log('retrieved workspaces: ',workspaces);
+                if (workspaces.status === 400){
+                    return handlerInput.responseBuilder
+                        .speak(`${workspaces.msg}`)
+                        .withShouldEndSession(true)
+                        .getResponse();
+                }
+                for (let j = 0; j < workspaces.length; j++) {
+                    updatedWorkspace = await util.patchMTCanvusClientWorkspace(sessionAttributes, sessionAttributes.canvus_client_id, workspaces[j].index, foundCanvas.id);
+                    console.log(`updating client ${sessionAttributes.canvus_client_id} with ${foundCanvas.id}`);
+                    
+                    if (updatedWorkspace.status === 400){
+                        errorCount += 1;
+                    }
+                }
+                
+            }
+        }
         if (errorCount > 0){
             speakOutput = `There was an error while updating ${errorCount} workspaces`;
         }else{
             speakOutput = `Canvas ${foundCanvas.name} has been successfully loaded on all clients.`;
         }
+        //END UPDATE
         
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('')
             .withShouldEndSession(true)
             .getResponse();
+    }
+};
+
+const CustomConfirmHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CustomConfirm';
+    },
+    handle(handlerInput) {
+        console.log("begin CustomConfirm");
+        const msgSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'msg');
+        const isCustomConfirmedSlot = Alexa.getSlot(handlerInput.requestEnvelope, 'isCustomConfirmed');
+        const msg = msgSlot ? msgSlot.value:null;
+        const isCustomConfirmed = isCustomConfirmedSlot ? isCustomConfirmedSlot.value:null;
+        
+        console.log("msg: ", msg);
+        console.log("isCustomConfirmed: ", isCustomConfirmed);
+        
+        const speakOutput = msg;
+        
+        if (isCustomConfirmed){
+            console.log("isCustomConfirmed exists");
+            return {
+                directives: [
+                    {
+                        "type": "Dialog.DelegateRequest",
+                        "target": "skill",
+                        "period": {
+                            "until": "EXPLICIT_RETURN"
+                        },
+                        "updatedRequest": {
+                            "type": "IntentRequest",
+                            "intent": {
+                                "name": "CustomConfirm",
+                                "confirmationStatus": (isCustomConfirmed === 'yes') ? "CONFIRMED" : "DENIED",
+                                "slots": {
+                                    "isCustomConfirmed": {
+                                        "name": "isCustomConfirmed",
+                                        "value": isCustomConfirmed
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }else{
+            console.log("no isCustomConfirmed");
+            return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .addElicitSlotDirective('isCustomConfirmed')
+                .getResponse();
+        }
     }
 };
 
@@ -883,7 +950,6 @@ const HelloWorldIntentHandler = {
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
             .withShouldEndSession(false)
             .getResponse();
     }
@@ -1007,6 +1073,8 @@ exports.handler = Alexa.SkillBuilders.custom()
         LoadCanvasOnClientWorkspaceHandler,
         LoadCanvasOnClientHandler,
         LoadCanvasAllHandler,
+        LoadCanvasHandler,
+        CustomConfirmHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         FallbackIntentHandler,
