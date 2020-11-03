@@ -17,7 +17,7 @@ const LaunchRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     async handle(handlerInput) {
-        let speakOutput = 'Welcome. You can ask me to show your clients, your workspaces and your canvases, or to load a canvas on a client, workspace or all clients';
+        let speakOutput = 'Welcome. You can ask me to list your clients, your workspaces and your canvases, or to load a canvas on a client, workspace or all clients';
         
         const checkSessionAttributesResponse = await util.checkSessionAttributes(handlerInput);
         console.log('checkSessionAttributesResponse: ',checkSessionAttributesResponse);
@@ -946,7 +946,7 @@ const HelloWorldIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'HelloWorldIntent';
     },
     handle(handlerInput) {
-        const speakOutput = 'Hello! You can ask me to show your clients, your workspaces and your canvases, or to load a canvas on a client, workspace or all clients';
+        const speakOutput = 'Hello! You can ask me to list your clients, your workspaces and your canvases, or to load a canvas on a client, workspace or all clients';
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
